@@ -197,6 +197,10 @@ declare class Sound {
    * Whether the player is playing or not.
    */
   isPlaying(): boolean
+
+  hasBluetoothHeadset(cb: (value: boolean) => void): void
+
+  playThroughBluetooth(): void
 }
 
 export = Sound;

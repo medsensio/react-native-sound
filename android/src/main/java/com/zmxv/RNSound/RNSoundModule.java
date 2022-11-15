@@ -7,6 +7,7 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.net.Uri;
 import android.media.AudioManager;
+import android.media.AudioDeviceInfo;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
@@ -34,6 +35,7 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
   Boolean mixWithOthers = true;
   Double focusedPlayerKey;
   Boolean wasPlayingBeforeFocusChange = false;
+  Boolean enablePlaythroughBluetooth = false;
 
   public RNSoundModule(ReactApplicationContext context) {
     super(context);
@@ -49,6 +51,23 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
     reactContext
             .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
             .emit("onPlayChange", params);
+  }
+
+  private AudioDeviceInfo getBluetoothHeadset(ReactApplicationContext context) throws Exception {
+    AudioManager audioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+
+    AudioDeviceInfo[] devices = audioManager.getDevices(audioManager.GET_DEVICES_OUTPUTS);
+
+    for (int i=0; i < devices.length; i++) {
+        AudioDeviceInfo device = devices[i];
+
+        if (device.getType() == device.TYPE_BLUETOOTH_A2DP) {
+            return device;
+        }            
+    }
+
+    // If we reached here, no device was found
+    throw new Exception();
   }
 
   @Override
@@ -277,6 +296,14 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
         return true;
       }
     });
+    if (enablePlaythroughBluetooth) {
+      try {
+        player.setPreferredDevice(getBluetoothHeadset(context));
+      } catch (Exception e) {
+        // Do not do anything
+        Log.d("RNSoundModule", "cannot set preferred device on player: " + e);
+      }
+    }
     player.start();
     setOnPlay(true, key);
   }
@@ -493,5 +520,20 @@ public class RNSoundModule extends ReactContextBaseJavaModule implements AudioMa
   @ReactMethod
   public void removeListeners(Integer count) {
     // Keep: Required for RN built in Event Emitter Calls.
+  }
+
+  @ReactMethod
+  public void hasBluetoothHeadset(final Callback callback) {
+    try {
+      getBluetoothHeadset(context);
+      callback.invoke(true);
+    } catch (Exception error) {
+      callback.invoke(false);
+    }
+  }
+
+  @ReactMethod
+  public void playThroughBluetooth() {
+    enablePlaythroughBluetooth = true;
   }
 }

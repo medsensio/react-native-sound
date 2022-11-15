@@ -279,6 +279,18 @@ Sound.prototype.setSpeakerphoneOn = function(value) {
   }
 };
 
+Sound.prototype.hasBluetoothHeadset = function(callback) {
+  if (this._loaded) {
+    RNSound.hasBluetoothHeadset(callback);
+  }
+};
+
+Sound.prototype.playThroughBluetooth = function() {
+  if (this._loaded) {
+    RNSound.playThroughBluetooth();
+  }
+};
+
 // ios only
 
 // This is deprecated.  Call the static one instead.
