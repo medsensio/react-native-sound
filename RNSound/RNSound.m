@@ -371,6 +371,23 @@ RCT_EXPORT_METHOD(setSpeakerPhone : (BOOL)on) {
     [session setActive:true error:nil];
 }
 
+//TODO implement
+RCT_EXPORT_METHOD(hasBluetoothHeadset:(RCTResponseSenderBlock)callback) {
+    @try {
+        //[self getBluetoothHeadset]; // Assuming you have defined this method elsewhere
+        callback(@[@(YES)]);
+    }
+    @catch (NSException *exception) {
+        callback(@[@(NO)]);
+    }
+}
+
+//Todo implement
+RCT_EXPORT_METHOD(playThroughBluetooth) {
+    //self.enablePlaythroughBluetooth = YES;
+}
+
+
 + (BOOL)requiresMainQueueSetup {
     return YES;
 }
